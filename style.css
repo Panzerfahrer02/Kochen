@@ -1,0 +1,28 @@
+body{
+font-family: Arial;
+margin:40px;
+}
+
+.container{
+display:flex;
+gap:40px;
+}
+
+.recipes{
+width:250px;
+border-right:1px solid #ccc;
+}
+
+.recipeDetail{
+flex:1;
+}
+
+.shopping{
+margin-top:40px;
+border-top:1px solid #ccc;
+padding-top:20px;
+}
+
+button{
+margin-top:10px;
+}
