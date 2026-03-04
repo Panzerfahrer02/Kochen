@@ -1,42 +1,162 @@
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang="de">
 <head>
-<meta charset="UTF-8">
-<title>Intelligenter Einkaufsplaner</title>
-<link rel="stylesheet" href="style.css">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Intelligenter Einkaufsplaner</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
-
 <body>
-
-<h1>Mein Einkaufsplaner</h1>
-
-<div class="container">
-
-    <div class="recipes">
-        <h2>Rezepte</h2>
-        <ul id="recipeList"></ul>
-        <button id="addRecipe">Rezept hinzufügen</button>
+  <header class="topbar">
+    <div class="topbar__left">
+      <h1>Intelligenter Einkaufsplaner</h1>
+      <p class="muted">Rezepte → Portionen wählen → Einkaufsliste automatisch aggregiert</p>
     </div>
+    <div class="topbar__right">
+      <button id="btnExport" class="btn btn--ghost" title="Einkaufsliste als Text kopieren">Liste kopieren</button>
+      <button id="btnClearShopping" class="btn btn--danger">Einkaufsliste leeren</button>
+    </div>
+  </header>
 
-    <div class="recipeDetail">
-        <h2 id="recipeTitle">Rezept auswählen</h2>
+  <main class="layout">
+    <!-- LEFT: Recipes -->
+    <section class="panel panel--left">
+      <div class="panel__header">
+        <h2>Rezepte</h2>
+        <button id="btnOpenAddModal" class="btn">Rezept hinzufügen</button>
+      </div>
 
-        <div id="recipeInfo"></div>
+      <div class="panel__tools">
+        <input id="recipeSearch" class="input" placeholder="Suche (Name) …" />
+      </div>
 
-        <div>
-            Portionen:
-            <input type="number" id="portionInput" value="1" min="1">
+      <ul id="recipeList" class="list"></ul>
+      <div id="emptyRecipes" class="empty muted" hidden>
+        Noch keine Rezepte. Klicke auf „Rezept hinzufügen“.
+      </div>
+    </section>
+
+    <!-- RIGHT: Tabs + Detail -->
+    <section class="panel panel--right">
+      <div class="tabs">
+        <div id="tabsBar" class="tabs__bar"></div>
+        <div id="tabsEmpty" class="empty muted">
+          Wähle links ein Rezept aus, um es als Tab zu öffnen.
+        </div>
+      </div>
+
+      <div id="recipeDetail" class="detail" hidden>
+        <div class="detail__header">
+          <div>
+            <h2 id="detailTitle"></h2>
+            <div class="detail__meta muted" id="detailMeta"></div>
+          </div>
+
+          <div class="detail__actions">
+            <div class="field">
+              <label class="label" for="servingsInput">Portionen</label>
+              <input id="servingsInput" class="input input--small" type="number" min="1" step="1" />
+            </div>
+
+            <div class="field">
+              <label class="label" for="ratingSelect">Deine Bewertung</label>
+              <select id="ratingSelect" class="input input--small">
+                <option value="">–</option>
+                <option value="1">1/5</option>
+                <option value="2">2/5</option>
+                <option value="3">3/5</option>
+                <option value="4">4/5</option>
+                <option value="5">5/5</option>
+              </select>
+            </div>
+
+            <button id="btnAddToShopping" class="btn btn--primary">Zur Einkaufsliste hinzufügen</button>
+          </div>
         </div>
 
-        <button id="addToShopping">Zur Einkaufsliste hinzufügen</button>
+        <div class="detail__grid">
+          <div class="card">
+            <h3>Zutaten</h3>
+            <ul id="ingredientsList" class="list list--compact"></ul>
+          </div>
+
+          <div class="card">
+            <h3>Zubereitung</h3>
+            <div id="instructions" class="text"></div>
+          </div>
+        </div>
+
+        <div class="detail__footer">
+          <button id="btnDeleteRecipe" class="btn btn--danger btn--ghost">Rezept löschen</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- BOTTOM: Shopping list -->
+    <section class="panel panel--bottom">
+      <div class="panel__header">
+        <h2>Einkaufsliste</h2>
+        <div class="muted small" id="shoppingHint">Aggregiert nach „Name + Einheit“.</div>
+      </div>
+      <ul id="shoppingList" class="list"></ul>
+      <div id="emptyShopping" class="empty muted" hidden>
+        Noch nichts drin. Öffne ein Rezept, wähle Portionen und klicke „Zur Einkaufsliste hinzufügen“.
+      </div>
+    </section>
+  </main>
+
+  <!-- Add Recipe Modal -->
+  <div id="modalBackdrop" class="modal__backdrop" hidden></div>
+  <div id="addModal" class="modal" hidden role="dialog" aria-modal="true" aria-labelledby="addModalTitle">
+    <div class="modal__header">
+      <h2 id="addModalTitle">Rezept hinzufügen</h2>
+      <button id="btnCloseAddModal" class="btn btn--ghost">✕</button>
     </div>
 
-</div>
+    <div class="modal__body">
+      <div class="formGrid">
+        <div class="field">
+          <label class="label">Name</label>
+          <input id="newName" class="input" placeholder="z. B. Pasta Tomate" />
+        </div>
 
-<div class="shopping">
-    <h2>Einkaufsliste</h2>
-    <ul id="shoppingList"></ul>
-</div>
+        <div class="field">
+          <label class="label">Basis-Portionen</label>
+          <input id="newBaseServings" class="input" type="number" min="1" step="1" value="2" />
+        </div>
+
+        <div class="field">
+          <label class="label">Zeit (Minuten)</label>
+          <input id="newTime" class="input" type="number" min="0" step="1" value="20" />
+        </div>
+
+        <div class="field field--full">
+          <label class="label">Zubereitung</label>
+          <textarea id="newInstructions" class="input textarea" rows="5" placeholder="Schritte / Text …"></textarea>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="ingredientsEditor">
+        <div class="ingredientsEditor__header">
+          <h3>Zutaten</h3>
+          <button id="btnAddIngredientRow" class="btn btn--ghost">+ Zutat</button>
+        </div>
+
+        <div id="ingredientRows" class="rows"></div>
+        <p class="muted small">Tipp: Einheiten z. B. g, kg, ml, l, pcs, TL, EL</p>
+      </div>
+    </div>
+
+    <div class="modal__footer">
+      <button id="btnCreateRecipe" class="btn btn--primary">Speichern</button>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
 
 <script src="app.js"></script>
 
