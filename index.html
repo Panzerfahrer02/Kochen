@@ -14,8 +14,8 @@
       <div id="errorBanner" class="errorBanner" hidden></div>
     </div>
     <div class="topbar__right">
-      <button id="btnReset" class="btn btn--ghost" title="Setzt lokale Daten zurück (Rezepte/Einkaufsliste)">
-        Reset
+      <button id="btnResetLocal" class="btn btn--ghost" title="Setzt lokale Daten zurück (eigene Rezepte/Einkaufsliste/Tabs)">
+        Reset lokal
       </button>
       <button id="btnExport" class="btn btn--ghost" title="Einkaufsliste als Text kopieren">Liste kopieren</button>
       <button id="btnClearShopping" class="btn btn--danger">Einkaufsliste leeren</button>
@@ -36,7 +36,7 @@
 
       <ul id="recipeList" class="list"></ul>
       <div id="emptyRecipes" class="empty muted" hidden>
-        Noch keine Rezepte. Klicke auf „Rezept hinzufügen“.
+        Noch keine Rezepte. (Prüfe data/recipes.json oder füge eins hinzu.)
       </div>
     </section>
 
@@ -92,7 +92,7 @@
         </div>
 
         <div class="detail__footer">
-          <button id="btnDeleteRecipe" class="btn btn--danger btn--ghost">Rezept löschen</button>
+          <button id="btnDeleteRecipe" class="btn btn--danger btn--ghost">Rezept löschen (lokal)</button>
         </div>
       </div>
     </section>
@@ -114,7 +114,7 @@
   <div id="modalBackdrop" class="modal__backdrop" hidden></div>
   <div id="addModal" class="modal" hidden role="dialog" aria-modal="true" aria-labelledby="addModalTitle">
     <div class="modal__header">
-      <h2 id="addModalTitle">Rezept hinzufügen</h2>
+      <h2 id="addModalTitle">Rezept hinzufügen (lokal)</h2>
       <button id="btnCloseAddModal" class="btn btn--ghost">✕</button>
     </div>
 
@@ -122,7 +122,7 @@
       <div class="formGrid">
         <div class="field">
           <label class="label">Name</label>
-          <input id="newName" class="input" placeholder="z. B. Pasta Tomate" />
+          <input id="newName" class="input" placeholder="z. B. Tofu Curry" />
         </div>
 
         <div class="field">
@@ -132,7 +132,7 @@
 
         <div class="field">
           <label class="label">Zeit (Minuten)</label>
-          <input id="newTime" class="input" type="number" min="0" step="1" value="20" />
+          <input id="newTime" class="input" type="number" min="0" step="1" value="30" />
         </div>
 
         <div class="field field--full">
@@ -150,7 +150,7 @@
         </div>
 
         <div id="ingredientRows" class="rows"></div>
-        <p class="muted small">Tipp: Einheiten z. B. g, kg, ml, l, pcs, TL, EL</p>
+        <p class="muted small">Einheiten z. B. g, kg, ml, l, pcs, TL, EL, Dose, Glas, Bund</p>
       </div>
     </div>
 
