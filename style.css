@@ -143,7 +143,7 @@ p{margin:0}
 }
 .empty{padding:18px 14px}
 
-/* Tabs: keine height:100% mehr */
+/* Tabs */
 .tabs{}
 .tabs__bar{
   flex: 0 0 auto;
@@ -226,7 +226,7 @@ p{margin:0}
 .shoppingRow__name{flex:1}
 .checkbox{width:18px; height:18px}
 
-/* NEU: Zutaten-Checkbox Layout */
+/* Zutaten-Checkbox Layout */
 .ingRow{
   display:flex;
   align-items:center;
