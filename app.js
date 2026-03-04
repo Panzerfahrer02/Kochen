@@ -1,10 +1,8 @@
 "use strict";
 
 /**
- * WICHTIG: Diese Version nutzt STORAGE v2, damit alte LocalStorage-Daten
- * nicht mehr in neue Strukturen reinfunken (typische Ursache für "Tabs leer").
+ * STORAGE v2 (damit alte Daten nicht reinfunken)
  */
-
 const STORAGE_KEYS = {
   recipes: "einkaufsplaner.recipes.v2",
   shopping: "einkaufsplaner.shopping.v2",
@@ -21,7 +19,8 @@ const $ = (id) => {
 function showError(err) {
   const banner = $("errorBanner");
   banner.hidden = false;
-  banner.textContent = `⚠️ Fehler: ${err?.message ?? err}\n\n` +
+  banner.textContent =
+    `⚠️ Fehler: ${err?.message ?? err}\n\n` +
     `Tipp: Wenn du gerade ein Update gemacht hast, klicke "Reset".`;
   console.error(err);
 }
@@ -61,34 +60,6 @@ function loadJSON(key, fallback) {
 
 function saveJSON(key, value) {
   localStorage.setItem(key, JSON.stringify(value));
-}
-
-// ---------- Optional: Load initial recipes from data/recipes.json ----------
-async function loadRecipesFromJsonFile() {
-  try {
-    const res = await fetch("data/recipes.json", { cache: "no-store" });
-    if (!res.ok) return null;
-    const data = await res.json();
-    if (!Array.isArray(data)) return null;
-
-    // ensure ids
-    return data.map((r) => ({
-      id: r.id ?? uid(),
-      name: String(r.name ?? "Unbenannt"),
-      baseServings: clampInt(r.baseServings ?? 2, 1, 200),
-      timeMinutes: clampInt(r.timeMinutes ?? 0, 0, 2000),
-      instructions: String(r.instructions ?? ""),
-      rating: r.rating ? clampInt(r.rating, 1, 5) : undefined,
-      ingredients: Array.isArray(r.ingredients) ? r.ingredients.map((i) => ({
-        id: i.id ?? uid(),
-        name: String(i.name ?? "").trim(),
-        amount: Number(i.amount ?? 0),
-        unit: String(i.unit ?? "").trim(),
-      })).filter(i => i.name && Number.isFinite(i.amount) && i.unit) : [],
-    })).filter(r => r.name && r.ingredients.length > 0);
-  } catch {
-    return null;
-  }
 }
 
 // ---------- Seed ----------
@@ -308,7 +279,7 @@ function renderDetail() {
   // instructions
   instructionsEl.textContent = recipe.instructions ?? "";
 
-  // ingredients (scaled)
+  // ingredients (scaled + selectable)
   renderScaledIngredients(recipe);
 
   servingsInputEl.oninput = () => {
@@ -338,23 +309,55 @@ function renderScaledIngredients(recipe) {
   const servings = clampInt(servingsInputEl.value, 1, 200);
   const factor = servings / recipe.baseServings;
 
+  // per recipe selection state
+  tabState[recipe.id] = tabState[recipe.id] ?? {};
+  tabState[recipe.id].selectedIngredients = tabState[recipe.id].selectedIngredients ?? {};
+
+  const selectedMap = tabState[recipe.id].selectedIngredients;
+
   ingredientsListEl.innerHTML = "";
+
   for (const ing of recipe.ingredients ?? []) {
+    // default: selected
+    if (selectedMap[ing.id] === undefined) selectedMap[ing.id] = true;
+
     const li = document.createElement("li");
     li.className = "listItem";
 
-    const left = document.createElement("div");
-    left.textContent = ing.name;
+    const check = document.createElement("input");
+    check.type = "checkbox";
+    check.className = "ingRow__check";
+    check.checked = Boolean(selectedMap[ing.id]);
+    check.addEventListener("change", () => {
+      selectedMap[ing.id] = check.checked;
+      persistTabState();
+    });
 
-    const right = document.createElement("div");
-    right.className = "badge";
+    const name = document.createElement("div");
+    name.className = "ingRow__name";
+    name.textContent = ing.name;
+
+    const leftWrap = document.createElement("div");
+    leftWrap.className = "ingRow";
+    leftWrap.appendChild(check);
+    leftWrap.appendChild(name);
+
     const scaled = (Number(ing.amount) || 0) * factor;
-    right.textContent = `${roundAmount(scaled)} ${ing.unit}`;
+    const amountBadge = document.createElement("div");
+    amountBadge.className = "badge";
+    amountBadge.textContent = `${roundAmount(scaled)} ${ing.unit}`;
 
-    li.appendChild(left);
-    li.appendChild(right);
+    const rightWrap = document.createElement("div");
+    rightWrap.className = "ingRow__right";
+    rightWrap.appendChild(amountBadge);
+
+    li.appendChild(leftWrap);
+    li.appendChild(rightWrap);
+
     ingredientsListEl.appendChild(li);
   }
+
+  persistTabState();
 }
 
 function renderShoppingList() {
@@ -420,7 +423,13 @@ function closeTab(recipeId) {
 function addRecipeToShopping(recipe, servings) {
   const factor = servings / recipe.baseServings;
 
+  const selectedMap = tabState?.[recipe.id]?.selectedIngredients ?? {};
+  let addedCount = 0;
+
   for (const ing of recipe.ingredients ?? []) {
+    const isSelected = selectedMap[ing.id] !== false; // default true
+    if (!isSelected) continue;
+
     const scaledAmount = (Number(ing.amount) || 0) * factor;
 
     const keyName = (ing.name ?? "").trim().toLowerCase();
@@ -440,10 +449,16 @@ function addRecipeToShopping(recipe, servings) {
         checked: false,
       });
     }
+
+    addedCount++;
   }
 
   persistShopping();
   renderShoppingList();
+
+  if (addedCount === 0) {
+    alert("Keine Zutaten ausgewählt. Bitte Häkchen setzen, was auf die Einkaufsliste soll.");
+  }
 }
 
 function deleteRecipe(recipeId) {
@@ -617,16 +632,13 @@ document.addEventListener("keydown", (e) => {
 });
 
 // ---------- Init ----------
-(async function init() {
+(function init() {
   try {
-    // If no local recipes exist, try loading from JSON, else seed
     if (!Array.isArray(recipes) || recipes.length === 0) {
-      const fromJson = await loadRecipesFromJsonFile();
-      recipes = (fromJson && fromJson.length > 0) ? fromJson : seedRecipes();
+      recipes = seedRecipes();
       persistRecipes();
     }
 
-    // sanitize tabs after recipe load
     openTabs = openTabs.filter((rid) => recipes.some((r) => r.id === rid));
     if (openTabs.length === 0) activeTabId = null;
     else if (!openTabs.includes(activeTabId)) activeTabId = openTabs[0];
