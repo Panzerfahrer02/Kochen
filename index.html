@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Intelligenter Einkaufsplaner</title>
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<h1>Mein Einkaufsplaner</h1>
+
+<div class="container">
+
+    <div class="recipes">
+        <h2>Rezepte</h2>
+        <ul id="recipeList"></ul>
+        <button id="addRecipe">Rezept hinzufügen</button>
+    </div>
+
+    <div class="recipeDetail">
+        <h2 id="recipeTitle">Rezept auswählen</h2>
+
+        <div id="recipeInfo"></div>
+
+        <div>
+            Portionen:
+            <input type="number" id="portionInput" value="1" min="1">
+        </div>
+
+        <button id="addToShopping">Zur Einkaufsliste hinzufügen</button>
+    </div>
+
+</div>
+
+<div class="shopping">
+    <h2>Einkaufsliste</h2>
+    <ul id="shoppingList"></ul>
+</div>
+
+<script src="app.js"></script>
+
+</body>
+</html>
