@@ -1,0 +1,14 @@
+[
+  {
+    "name": "Pasta Tomate (vegan)",
+    "baseServings": 2,
+    "timeMinutes": 20,
+    "instructions": "1) Nudeln kochen.\n2) Tomaten + Knoblauch in Olivenöl anbraten.\n3) Alles mischen und abschmecken.",
+    "ingredients": [
+      { "name": "Nudeln", "amount": 200, "unit": "g" },
+      { "name": "Tomaten", "amount": 2, "unit": "pcs" },
+      { "name": "Knoblauchzehe", "amount": 1, "unit": "pcs" },
+      { "name": "Olivenöl", "amount": 2, "unit": "EL" }
+    ]
+  }
+]
