@@ -11,8 +11,12 @@
     <div class="topbar__left">
       <h1>Intelligenter Einkaufsplaner</h1>
       <p class="muted">Rezepte → Portionen wählen → Einkaufsliste automatisch aggregiert</p>
+      <div id="errorBanner" class="errorBanner" hidden></div>
     </div>
     <div class="topbar__right">
+      <button id="btnReset" class="btn btn--ghost" title="Setzt lokale Daten zurück (Rezepte/Einkaufsliste)">
+        Reset
+      </button>
       <button id="btnExport" class="btn btn--ghost" title="Einkaufsliste als Text kopieren">Liste kopieren</button>
       <button id="btnClearShopping" class="btn btn--danger">Einkaufsliste leeren</button>
     </div>
@@ -155,10 +159,5 @@
   </div>
 
   <script src="app.js"></script>
-</body>
-</html>
-
-<script src="app.js"></script>
-
 </body>
 </html>
