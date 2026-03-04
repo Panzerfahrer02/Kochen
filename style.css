@@ -1,10 +1,8 @@
 :root{
   --bg:#0b0f17;
   --panel:#121a26;
-  --card:#0f1622;
   --text:#e7eefc;
   --muted:#a8b4cc;
-  --border:#223049;
   --accent:#6ea8fe;
   --danger:#ff5a6a;
   --shadow: 0 10px 30px rgba(0,0,0,.25);
@@ -35,6 +33,16 @@ p{margin:0}
 .topbar__right{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
 .muted{color:var(--muted)}
 .small{font-size:12px}
+
+.errorBanner{
+  margin-top:10px;
+  padding:10px 12px;
+  border-radius:12px;
+  border:1px solid rgba(255,90,106,.55);
+  background: rgba(255,90,106,.12);
+  color: #ffd5da;
+  white-space: pre-wrap;
+}
 
 .layout{
   padding:16px 24px 24px;
