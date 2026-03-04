@@ -1,5 +1,54 @@
 [
   {
+    "name": "Kokos-Erdnuss-Tofu-Gemüse (vegan)",
+    "baseServings": 4,
+    "timeMinutes": 40,
+    "instructions": "1) Tofu in ca. 1,5 cm Würfel schneiden.\n2) Tofu in Schüssel, ca. 2 TL Salz drauf, mit kochendem Wasser bedecken. 10 min ziehen lassen.\n3) Abgießen, im Sieb trocknen lassen.\n4) Zwiebeln grob schneiden, Karotte in Scheiben/Streifen, Paprika in Streifen.\n5) Champignons grob schneiden. Frühlingszwiebeln in Ringe: weiß & grün trennen.\n6) Babymais dritteln.\n7) Zwiebeln anbraten bis glasig/leicht braun.\n8) Champignons + weiße Frühlingszwiebeln dazu, anbraten.\n9) Karotte, Paprika, Brechbohnen dazu, weiter anbraten.\n10) Grüne Frühlingszwiebeln dazu.\n11) Mit Kokosmilch ablöschen. Etwas Wasser + Gemüsebrühepulver dazu.\n12) Erdnussbutter einrühren. Mit Sojasauce, MSG (optional), Pfeffer/Salz abschmecken.\n13) Tofu separat knusprig anbraten, mit etwas Sojasauce & Pfeffer ablöschen.\n14) Tofu am Ende in die Sauce geben. Reis kochen. Essen.",
+    "ingredients": [
+      { "name": "Tofu (extra firm)", "amount": 2, "unit": "pcs" },
+      { "name": "Paprika", "amount": 1, "unit": "pcs" },
+      { "name": "Karotte", "amount": 1, "unit": "pcs" },
+      { "name": "Zwiebel", "amount": 3, "unit": "pcs" },
+      { "name": "Frühlingszwiebeln", "amount": 1, "unit": "Bund" },
+      { "name": "Champignons", "amount": 250, "unit": "g" },
+      { "name": "Babymaiskolben (Glas)", "amount": 1, "unit": "Glas" },
+      { "name": "TK Brechbohnen", "amount": 300, "unit": "g" },
+      { "name": "Kokosmilch", "amount": 2, "unit": "Dose" },
+      { "name": "Erdnussbutter (crunchy)", "amount": 150, "unit": "g" },
+      { "name": "Sojasauce", "amount": 4, "unit": "EL" },
+      { "name": "Gemüsebrühepulver", "amount": 2, "unit": "TL" },
+      { "name": "Glutamat (MSG)", "amount": 1, "unit": "TL" },
+      { "name": "Salz", "amount": 1, "unit": "TL" },
+      { "name": "Pfeffer", "amount": 1, "unit": "TL" },
+      { "name": "Reis", "amount": 300, "unit": "g" }
+    ]
+  },
+  {
+    "name": "Japanese Curry mit Tofu (vegan)",
+    "baseServings": 4,
+    "timeMinutes": 70,
+    "instructions": "1) Ca. 1 L Wasser erhitzen.\n2) Tofu in ca. 1,5 cm Würfel schneiden.\n3) Tofu mit ca. 1,5 TL Salz übergießen (kochendes Wasser), 10 min stehen lassen, abgießen.\n4) Tofu in Pfanne anbraten, pfeffern und mit Sojasauce ablöschen. Beiseite.\n5) Zwiebeln halbieren und in dünne halbe Scheiben schneiden.\n6) Ingwer fein würfeln, Knoblauch fein hacken.\n7) Apfel grob reiben.\n8) Kartoffeln in ca. 3 cm Würfel, Karotten in dicke Scheiben (ggf. halbieren), Paprika würfeln.\n9) Zwiebeln + Ingwer im Topf anbraten (mittlere Hitze), oft rühren.\n10) Knoblauch dazu. Wenn glasig: Apfel dazu und anbraten, bis leicht karamellisiert.\n11) Kartoffeln, Karotten, Paprika dazu. Mit Wasser bedecken.\n12) Gemüsebrühepulver, Ketchup, Sojasauce, Süßungsmittel (z.B. Ahornsirup), MSG (optional) dazu.\n13) Köcheln bis Kartoffeln weich sind.\n14) Curry-Blöcke nach und nach einrühren/auflösen, bis gewünschte Dicke.\n15) Abschmecken. Tofu wieder dazugeben.\n16) Reis kochen und servieren.",
+    "ingredients": [
+      { "name": "Tofu (extra firm)", "amount": 1, "unit": "pcs" },
+      { "name": "S&B Japanese Curry Blocks", "amount": 0.5, "unit": "Packung" },
+      { "name": "Zwiebel", "amount": 3, "unit": "pcs" },
+      { "name": "Karotte", "amount": 2, "unit": "pcs" },
+      { "name": "Kartoffel (festkochend)", "amount": 5, "unit": "pcs" },
+      { "name": "Apfel", "amount": 1, "unit": "pcs" },
+      { "name": "Ingwer", "amount": 2, "unit": "cm" },
+      { "name": "Knoblauchzehe", "amount": 2, "unit": "pcs" },
+      { "name": "Paprika", "amount": 1, "unit": "pcs" },
+      { "name": "Gemüsebrühepulver", "amount": 2, "unit": "TL" },
+      { "name": "Ketchup", "amount": 2, "unit": "EL" },
+      { "name": "Sojasauce", "amount": 3, "unit": "EL" },
+      { "name": "Ahornsirup (oder Süßungsmittel)", "amount": 1, "unit": "EL" },
+      { "name": "Glutamat (MSG)", "amount": 1, "unit": "TL" },
+      { "name": "Salz", "amount": 1, "unit": "TL" },
+      { "name": "Pfeffer", "amount": 1, "unit": "TL" },
+      { "name": "Reis", "amount": 300, "unit": "g" }
+    ]
+  },
+  {
     "name": "Pasta Tomate (vegan)",
     "baseServings": 2,
     "timeMinutes": 20,
