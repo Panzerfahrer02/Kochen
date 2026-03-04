@@ -60,6 +60,8 @@ p{margin:0}
   overflow:hidden;
 }
 .panel--left{grid-column:1; grid-row:1 / span 1; min-height: 520px}
+
+/* WICHTIG: flex-layout im rechten panel, damit detail sichtbar bleibt */
 .panel--right{
   grid-column:2;
   grid-row:1 / span 1;
@@ -67,6 +69,7 @@ p{margin:0}
   display:flex;
   flex-direction:column;
 }
+
 .panel--bottom{grid-column:1 / span 2; grid-row:2; min-height: 260px}
 
 .panel__header{
@@ -140,9 +143,8 @@ p{margin:0}
 }
 .empty{padding:18px 14px}
 
-
+/* Tabs: keine height:100% mehr */
 .tabs{}
-
 .tabs__bar{
   flex: 0 0 auto;
   display:flex;
@@ -179,7 +181,7 @@ p{margin:0}
   padding:14px;
   flex: 1 1 auto;
   overflow:auto;
-  min-height: 0; 
+  min-height: 0;
 }
 .detail__header{
   display:flex;
@@ -223,6 +225,17 @@ p{margin:0}
 .shoppingRow:hover{background: rgba(255,255,255,.06)}
 .shoppingRow__name{flex:1}
 .checkbox{width:18px; height:18px}
+
+/* NEU: Zutaten-Checkbox Layout */
+.ingRow{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  width:100%;
+}
+.ingRow__name{flex:1}
+.ingRow__check{width:18px; height:18px}
+.ingRow__right{display:flex; align-items:center; gap:10px}
 
 .modal__backdrop{
   position:fixed; inset:0;
