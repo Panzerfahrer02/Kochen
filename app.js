@@ -1,37 +1,37 @@
 "use strict";
 
 /**
- * Data shapes:
- * Recipe {
- *   id: string,
- *   name: string,
- *   baseServings: number,
- *   timeMinutes: number,
- *   instructions: string,
- *   ingredients: [{ id, name, amount, unit }]
- *   rating?: number (1..5)
- * }
- *
- * ShoppingItem {
- *   id: string,
- *   name: string,
- *   amount: number,
- *   unit: string,
- *   checked: boolean
- * }
+ * WICHTIG: Diese Version nutzt STORAGE v2, damit alte LocalStorage-Daten
+ * nicht mehr in neue Strukturen reinfunken (typische Ursache für "Tabs leer").
  */
 
 const STORAGE_KEYS = {
-  recipes: "einkaufsplaner.recipes.v1",
-  shopping: "einkaufsplaner.shopping.v1",
-  openTabs: "einkaufsplaner.openTabs.v1", // array of recipe ids
-  tabState: "einkaufsplaner.tabState.v1", // map: recipeId -> { servings }
+  recipes: "einkaufsplaner.recipes.v2",
+  shopping: "einkaufsplaner.shopping.v2",
+  openTabs: "einkaufsplaner.openTabs.v2",
+  tabState: "einkaufsplaner.tabState.v2",
 };
 
-const $ = (id) => document.getElementById(id);
+const $ = (id) => {
+  const el = document.getElementById(id);
+  if (!el) throw new Error(`Missing element id="${id}" (index.html ↔ app.js mismatch)`);
+  return el;
+};
+
+function showError(err) {
+  const banner = $("errorBanner");
+  banner.hidden = false;
+  banner.textContent = `⚠️ Fehler: ${err?.message ?? err}\n\n` +
+    `Tipp: Wenn du gerade ein Update gemacht hast, klicke "Reset".`;
+  console.error(err);
+}
+
+window.addEventListener("error", (e) => showError(e.error || e.message));
+window.addEventListener("unhandledrejection", (e) => showError(e.reason || "Unhandled Promise Rejection"));
 
 function uid() {
-  return (crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random()}`).toString();
+  if (crypto && crypto.randomUUID) return crypto.randomUUID();
+  return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 }
 
 function clampInt(n, min, max) {
@@ -41,9 +41,6 @@ function clampInt(n, min, max) {
 }
 
 function roundAmount(x) {
-  // Nicely display amounts without ugly floating noise:
-  // - integers as-is
-  // - else 1 decimal if needed, else 2 decimals max
   const eps = 1e-9;
   if (Math.abs(x - Math.round(x)) < eps) return String(Math.round(x));
   const one = Math.round(x * 10) / 10;
@@ -66,34 +63,43 @@ function saveJSON(key, value) {
   localStorage.setItem(key, JSON.stringify(value));
 }
 
-// ---------- State ----------
-let recipes = loadJSON(STORAGE_KEYS.recipes, null);
-let shoppingList = loadJSON(STORAGE_KEYS.shopping, null);
-let openTabs = loadJSON(STORAGE_KEYS.openTabs, []);
-let tabState = loadJSON(STORAGE_KEYS.tabState, {});
+// ---------- Optional: Load initial recipes from data/recipes.json ----------
+async function loadRecipesFromJsonFile() {
+  try {
+    const res = await fetch("data/recipes.json", { cache: "no-store" });
+    if (!res.ok) return null;
+    const data = await res.json();
+    if (!Array.isArray(data)) return null;
 
-if (!Array.isArray(recipes) || recipes.length === 0) {
-  recipes = seedRecipes();
-  saveJSON(STORAGE_KEYS.recipes, recipes);
+    // ensure ids
+    return data.map((r) => ({
+      id: r.id ?? uid(),
+      name: String(r.name ?? "Unbenannt"),
+      baseServings: clampInt(r.baseServings ?? 2, 1, 200),
+      timeMinutes: clampInt(r.timeMinutes ?? 0, 0, 2000),
+      instructions: String(r.instructions ?? ""),
+      rating: r.rating ? clampInt(r.rating, 1, 5) : undefined,
+      ingredients: Array.isArray(r.ingredients) ? r.ingredients.map((i) => ({
+        id: i.id ?? uid(),
+        name: String(i.name ?? "").trim(),
+        amount: Number(i.amount ?? 0),
+        unit: String(i.unit ?? "").trim(),
+      })).filter(i => i.name && Number.isFinite(i.amount) && i.unit) : [],
+    })).filter(r => r.name && r.ingredients.length > 0);
+  } catch {
+    return null;
+  }
 }
-if (!Array.isArray(shoppingList)) {
-  shoppingList = [];
-  saveJSON(STORAGE_KEYS.shopping, shoppingList);
-}
-if (!Array.isArray(openTabs)) openTabs = [];
-if (typeof tabState !== "object" || tabState === null) tabState = {};
-
-let activeTabId = openTabs[0] ?? null;
 
 // ---------- Seed ----------
 function seedRecipes() {
   return [
     {
       id: uid(),
-      name: "Pasta Tomate",
+      name: "Pasta Tomate (vegan)",
       baseServings: 2,
       timeMinutes: 20,
-      instructions: "1) Nudeln kochen.\n2) Tomaten + Knoblauch anbraten.\n3) Alles mischen und abschmecken.",
+      instructions: "1) Nudeln kochen.\n2) Tomaten + Knoblauch in Olivenöl anbraten.\n3) Alles mischen und abschmecken.",
       rating: 3,
       ingredients: [
         { id: uid(), name: "Nudeln", amount: 200, unit: "g" },
@@ -104,21 +110,33 @@ function seedRecipes() {
     },
     {
       id: uid(),
-      name: "Haferflocken Bowl",
+      name: "Haferflocken Bowl (vegan)",
       baseServings: 1,
       timeMinutes: 5,
       instructions: "Alles in eine Schüssel. Optional mit Obst/Nüssen toppen.",
       rating: 4,
       ingredients: [
         { id: uid(), name: "Haferflocken", amount: 80, unit: "g" },
-        { id: uid(), name: "Milch", amount: 250, unit: "ml" },
+        { id: uid(), name: "Haferdrink", amount: 250, unit: "ml" },
         { id: uid(), name: "Banane", amount: 1, unit: "pcs" },
       ],
     },
   ];
 }
 
-// ---------- DOM refs ----------
+// ---------- State ----------
+let recipes = loadJSON(STORAGE_KEYS.recipes, null);
+let shoppingList = loadJSON(STORAGE_KEYS.shopping, null);
+let openTabs = loadJSON(STORAGE_KEYS.openTabs, []);
+let tabState = loadJSON(STORAGE_KEYS.tabState, {});
+
+if (!Array.isArray(shoppingList)) shoppingList = [];
+if (!Array.isArray(openTabs)) openTabs = [];
+if (typeof tabState !== "object" || tabState === null) tabState = {};
+
+let activeTabId = openTabs[0] ?? null;
+
+// ---------- DOM ----------
 const recipeListEl = $("recipeList");
 const emptyRecipesEl = $("emptyRecipes");
 const recipeSearchEl = $("recipeSearch");
@@ -141,6 +159,7 @@ const emptyShoppingEl = $("emptyShopping");
 
 const btnClearShoppingEl = $("btnClearShopping");
 const btnExportEl = $("btnExport");
+const btnResetEl = $("btnReset");
 
 const btnOpenAddModalEl = $("btnOpenAddModal");
 const btnCloseAddModalEl = $("btnCloseAddModal");
@@ -155,7 +174,13 @@ const ingredientRowsEl = $("ingredientRows");
 const btnAddIngredientRowEl = $("btnAddIngredientRow");
 const btnCreateRecipeEl = $("btnCreateRecipe");
 
-// ---------- Rendering ----------
+// ---------- Persist ----------
+function persistTabs() { saveJSON(STORAGE_KEYS.openTabs, openTabs); }
+function persistRecipes() { saveJSON(STORAGE_KEYS.recipes, recipes); }
+function persistShopping() { saveJSON(STORAGE_KEYS.shopping, shoppingList); }
+function persistTabState() { saveJSON(STORAGE_KEYS.tabState, tabState); }
+
+// ---------- Render ----------
 function renderAll() {
   renderRecipeList();
   renderTabs();
@@ -171,11 +196,7 @@ function renderRecipeList() {
     .filter((r) => (q ? r.name.toLowerCase().includes(q) : true));
 
   recipeListEl.innerHTML = "";
-  if (filtered.length === 0) {
-    emptyRecipesEl.hidden = recipes.length !== 0; // show only if really empty
-  } else {
-    emptyRecipesEl.hidden = true;
-  }
+  emptyRecipesEl.hidden = !(recipes.length === 0);
 
   for (const recipe of filtered) {
     const li = document.createElement("li");
@@ -224,7 +245,6 @@ function renderTabs() {
     detailEl.hidden = true;
     return;
   }
-
   tabsEmptyEl.style.display = "none";
 
   for (const rid of openTabs) {
@@ -291,12 +311,11 @@ function renderDetail() {
   // ingredients (scaled)
   renderScaledIngredients(recipe);
 
-  // handlers (re-bind safe)
   servingsInputEl.oninput = () => {
     const newServings = clampInt(servingsInputEl.value, 1, 200);
     servingsInputEl.value = String(newServings);
     tabState[recipe.id] = { ...(tabState[recipe.id] ?? {}), servings: newServings };
-    saveJSON(STORAGE_KEYS.tabState, tabState);
+    persistTabState();
     renderScaledIngredients(recipe);
   };
 
@@ -304,7 +323,7 @@ function renderDetail() {
     const val = ratingSelectEl.value;
     recipe.rating = val ? clampInt(val, 1, 5) : undefined;
     persistRecipes();
-    renderRecipeList(); // update meta
+    renderRecipeList();
   };
 
   btnAddToShoppingEl.onclick = () => {
@@ -312,9 +331,7 @@ function renderDetail() {
     addRecipeToShopping(recipe, servings);
   };
 
-  btnDeleteRecipeEl.onclick = () => {
-    deleteRecipe(recipe.id);
-  };
+  btnDeleteRecipeEl.onclick = () => deleteRecipe(recipe.id);
 }
 
 function renderScaledIngredients(recipe) {
@@ -349,7 +366,6 @@ function renderShoppingList() {
   }
   emptyShoppingEl.hidden = true;
 
-  // sort: unchecked first, then alpha
   const items = shoppingList
     .slice()
     .sort((a, b) => Number(a.checked) - Number(b.checked) || a.name.localeCompare(b.name));
@@ -395,24 +411,10 @@ function openRecipeTab(recipeId) {
 
 function closeTab(recipeId) {
   openTabs = openTabs.filter((id) => id !== recipeId);
-  if (activeTabId === recipeId) {
-    activeTabId = openTabs[openTabs.length - 1] ?? null;
-  }
+  if (activeTabId === recipeId) activeTabId = openTabs[openTabs.length - 1] ?? null;
   persistTabs();
   renderTabs();
   renderDetail();
-}
-
-function persistTabs() {
-  saveJSON(STORAGE_KEYS.openTabs, openTabs);
-}
-
-function persistRecipes() {
-  saveJSON(STORAGE_KEYS.recipes, recipes);
-}
-
-function persistShopping() {
-  saveJSON(STORAGE_KEYS.shopping, shoppingList);
 }
 
 function addRecipeToShopping(recipe, servings) {
@@ -421,7 +423,6 @@ function addRecipeToShopping(recipe, servings) {
   for (const ing of recipe.ingredients ?? []) {
     const scaledAmount = (Number(ing.amount) || 0) * factor;
 
-    // merge by name+unit (simple & robust)
     const keyName = (ing.name ?? "").trim().toLowerCase();
     const keyUnit = (ing.unit ?? "").trim().toLowerCase();
 
@@ -429,9 +430,8 @@ function addRecipeToShopping(recipe, servings) {
       (s) => s.name.trim().toLowerCase() === keyName && s.unit.trim().toLowerCase() === keyUnit
     );
 
-    if (existing) {
-      existing.amount += scaledAmount;
-    } else {
+    if (existing) existing.amount += scaledAmount;
+    else {
       shoppingList.push({
         id: uid(),
         name: ing.name.trim(),
@@ -456,34 +456,30 @@ function deleteRecipe(recipeId) {
   recipes = recipes.filter((r) => r.id !== recipeId);
   persistRecipes();
 
-  // close tab if open
   openTabs = openTabs.filter((id) => id !== recipeId);
   if (activeTabId === recipeId) activeTabId = openTabs[0] ?? null;
   persistTabs();
 
-  // remove tabState
   delete tabState[recipeId];
-  saveJSON(STORAGE_KEYS.tabState, tabState);
+  persistTabState();
 
   renderAll();
 }
 
-// ---------- Modal: Add Recipe ----------
+// ---------- Modal ----------
 function openAddModal() {
   modalBackdropEl.hidden = false;
   addModalEl.hidden = false;
 
-  // reset
   newNameEl.value = "";
   newBaseServingsEl.value = "2";
   newTimeEl.value = "20";
   newInstructionsEl.value = "";
   ingredientRowsEl.innerHTML = "";
 
-  // 3 rows default
-  addIngredientRow("Nudeln", 200, "g");
-  addIngredientRow("Tomaten", 2, "pcs");
-  addIngredientRow("Olivenöl", 2, "EL");
+  addIngredientRow("", "", "");
+  addIngredientRow("", "", "");
+  addIngredientRow("", "", "");
 
   newNameEl.focus();
 }
@@ -499,7 +495,7 @@ function addIngredientRow(name = "", amount = "", unit = "") {
 
   const inName = document.createElement("input");
   inName.className = "input";
-  inName.placeholder = "Zutat (z. B. Milch)";
+  inName.placeholder = "Zutat (z. B. Kichererbsen)";
   inName.value = String(name);
 
   const inAmount = document.createElement("input");
@@ -554,25 +550,10 @@ function createRecipeFromModal() {
   const instructions = (newInstructionsEl.value ?? "").trim();
   const ingredients = collectIngredientRows();
 
-  if (!name) {
-    alert("Bitte einen Rezeptnamen eingeben.");
-    return;
-  }
-  if (ingredients.length === 0) {
-    alert("Bitte mindestens eine gültige Zutat eingeben (Name, Menge, Einheit).");
-    return;
-  }
+  if (!name) return alert("Bitte einen Rezeptnamen eingeben.");
+  if (ingredients.length === 0) return alert("Bitte mindestens eine gültige Zutat (Name, Menge, Einheit) eingeben.");
 
-  const recipe = {
-    id: uid(),
-    name,
-    baseServings,
-    timeMinutes,
-    instructions,
-    ingredients,
-    rating: undefined,
-  };
-
+  const recipe = { id: uid(), name, baseServings, timeMinutes, instructions, ingredients, rating: undefined };
   recipes.push(recipe);
   persistRecipes();
 
@@ -581,30 +562,33 @@ function createRecipeFromModal() {
   openRecipeTab(recipe.id);
 }
 
-// ---------- Export ----------
+// ---------- Export / Reset ----------
 function shoppingAsText() {
   const items = shoppingList
     .slice()
     .sort((a, b) => a.name.localeCompare(b.name))
     .map((i) => `- ${roundAmount(i.amount)} ${i.unit} ${i.name}${i.checked ? " ✅" : ""}`)
     .join("\n");
-
   return `Einkaufsliste\n\n${items}\n`;
 }
 
 async function copyShoppingList() {
-  if (shoppingList.length === 0) {
-    alert("Die Einkaufsliste ist leer.");
-    return;
-  }
+  if (shoppingList.length === 0) return alert("Die Einkaufsliste ist leer.");
   const text = shoppingAsText();
   try {
     await navigator.clipboard.writeText(text);
-    alert("Einkaufsliste wurde in die Zwischenablage kopiert.");
+    alert("Einkaufsliste wurde kopiert.");
   } catch {
-    // fallback
     prompt("Kopiere den Text:", text);
   }
+}
+
+function resetLocalData() {
+  const ok = confirm("Reset löscht lokale Rezepte, Tabs, Einkaufsliste und Tab-States.\n\nFortfahren?");
+  if (!ok) return;
+
+  Object.values(STORAGE_KEYS).forEach((k) => localStorage.removeItem(k));
+  location.reload();
 }
 
 // ---------- Wire up ----------
@@ -619,27 +603,37 @@ btnCreateRecipeEl.addEventListener("click", createRecipeFromModal);
 
 btnClearShoppingEl.addEventListener("click", () => {
   if (shoppingList.length === 0) return;
-  const ok = confirm("Einkaufsliste wirklich leeren?");
-  if (!ok) return;
+  if (!confirm("Einkaufsliste wirklich leeren?")) return;
   shoppingList = [];
   persistShopping();
   renderShoppingList();
 });
 
 btnExportEl.addEventListener("click", copyShoppingList);
+btnResetEl.addEventListener("click", resetLocalData);
 
-// Close modal on Escape
 document.addEventListener("keydown", (e) => {
   if (e.key === "Escape" && !addModalEl.hidden) closeAddModal();
 });
 
 // ---------- Init ----------
-(function init() {
-  // Ensure tabs contain only existing recipes (after deletes)
-  openTabs = openTabs.filter((rid) => recipes.some((r) => r.id === rid));
-  if (openTabs.length === 0) activeTabId = null;
-  else if (!openTabs.includes(activeTabId)) activeTabId = openTabs[0];
+(async function init() {
+  try {
+    // If no local recipes exist, try loading from JSON, else seed
+    if (!Array.isArray(recipes) || recipes.length === 0) {
+      const fromJson = await loadRecipesFromJsonFile();
+      recipes = (fromJson && fromJson.length > 0) ? fromJson : seedRecipes();
+      persistRecipes();
+    }
 
-  persistTabs();
-  renderAll();
+    // sanitize tabs after recipe load
+    openTabs = openTabs.filter((rid) => recipes.some((r) => r.id === rid));
+    if (openTabs.length === 0) activeTabId = null;
+    else if (!openTabs.includes(activeTabId)) activeTabId = openTabs[0];
+
+    persistTabs();
+    renderAll();
+  } catch (err) {
+    showError(err);
+  }
 })();
