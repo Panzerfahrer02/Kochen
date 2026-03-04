@@ -59,5 +59,30 @@
       { "name": "Knoblauchzehe", "amount": 1, "unit": "pcs" },
       { "name": "Olivenöl", "amount": 2, "unit": "EL" }
     ]
-  }
+  },
+  {
+  "name": "Fried Rice mit Tofu & Cashews (vegan)",
+  "baseServings": 4,
+  "timeMinutes": 35,
+  "instructions": "1) Idealerweise Reis am Vortag kochen und kalt stellen.\n2) Zwiebel würfeln, Ingwer klein würfeln, Knoblauch fein hacken/pressen.\n3) Tofu, Karotte, Paprika (und optional Ananas) würfeln.\n4) Cashews ohne Öl in der Pfanne/Wok anrösten, herausnehmen.\n5) Öl erhitzen, Zwiebel + Ingwer anbraten.\n6) Knoblauch dazu.\n7) Tofu dazugeben und anbraten.\n8) Karotte + Paprika dazu, mit etwas Salz und viel Pfeffer braten.\n9) Optional Ananas dazu.\n10) TK Bohnen + TK Erbsen dazugeben, braten lassen.\n11) Reis dazugeben, Klumpen lösen und kräftig anbraten.\n12) Cashews wieder dazu.\n13) Mit Sojasauce + Pilzsauce (und optional MSG) würzen, umrühren und abschmecken.\n14) Ham ham.",
+  "ingredients": [
+    { "name": "Reis (gekocht, am besten vom Vortag)", "amount": 600, "unit": "g" },
+    { "name": "Ingwer", "amount": 2, "unit": "cm" },
+    { "name": "Zwiebel", "amount": 2, "unit": "pcs" },
+    { "name": "Knoblauchzehe", "amount": 2, "unit": "pcs" },
+    { "name": "Paprika", "amount": 1, "unit": "pcs" },
+    { "name": "Karotte", "amount": 3, "unit": "pcs" },
+    { "name": "TK Brechbohnen", "amount": 300, "unit": "g" },
+    { "name": "TK Erbsen", "amount": 300, "unit": "g" },
+    { "name": "Tofu", "amount": 350, "unit": "g" },
+    { "name": "Cashews", "amount": 150, "unit": "g" },
+    { "name": "Ananas (optional)", "amount": 200, "unit": "g" },
+    { "name": "Öl zum Braten", "amount": 3, "unit": "EL" },
+    { "name": "Sojasauce", "amount": 4, "unit": "EL" },
+    { "name": "Pilzsauce", "amount": 2, "unit": "EL" },
+    { "name": "Glutamat (MSG, optional)", "amount": 1, "unit": "TL" },
+    { "name": "Salz", "amount": 1, "unit": "TL" },
+    { "name": "Pfeffer", "amount": 1, "unit": "TL" }
+  ]
+}
 ]
